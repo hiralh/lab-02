@@ -81,7 +81,7 @@ fun CityListScreen(
     onDeleteCity: (String) -> Unit
 ){
     var newCityName by remember {mutableStateOf("")}
-    //var selectedCityName by remember {mutableStateOf("")}
+    var selectedCityName by remember {mutableStateOf("")}  // This allows us to track which city was selected so that we can send it to the CityRow. When a city is selected, this var will be of type String but if no city is selected then the default value will be null so that it doesn't delete any city.
 
     Column(modifier = modifier.fillMaxSize()){
         Row(modifier = Modifier.padding(8.dp)){
@@ -106,9 +106,9 @@ fun CityListScreen(
             }
             Button(
                 onClick = {
-                    if (newCityName.isNotBlank()){
-                        onDeleteCity(newCityName)
-                        newCityName=""
+                    if (selectedCityName.isNotBlank()){
+                        onDeleteCity(selectedCityName)  // Calls the delete function for the selected city name
+                        selectedCityName= ""  // Once delete operation is successful, the value is once again changed to null
                     }
                 }
             ){
@@ -118,19 +118,27 @@ fun CityListScreen(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             // items(cities) loops through the city list and creates one UI row for each city.
             items(cities){ city ->
-                CityRow(city = city)
+                CityRow(city = city,
+                    // The below 2 lines (line 123 and 124) is from ECOSIA AI Chat, "I am using kotlin in Android Studio and I am making an app which displays a list of cities and allows users to add and delete city names. I have already coded the CityListScreen, the CityRepository, the CityRow, the Main Activity, the add and the delete features. However, for the delete feature, I want the user to be able to select a city from the list and then press the delete button to delete it. What ways can I implement this feature in using .clickable in CityRow and CityListScreen?", 2026-09-11
+                    selectedChecker = city==selectedCityName,
+                    onClick = {selectedCityName = if(selectedCityName == city) "" else city }  // Helps in selecting/deselecting a city or selecting a different city
+                )
             }
         }
     }
 }
 
 @Composable
-fun CityRow(city: String){ // Pass selectedCityName to CityRow to delete
+fun CityRow(city: String,
+            selectedChecker: Boolean,
+            onClick: ()->Unit
+) {
     Text(
         text = city,
         fontSize = 28.sp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 18.dp, vertical = 14.dp)
+            .clickable{onClick()}
     )
 }
